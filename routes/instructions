@@ -1,0 +1,95 @@
+var express = require('express')
+const { recipeInstruction} = require('../database')
+var router = express.Router()
+
+
+//creating a new recipe
+router.post('/', async function (req, res) {
+  const {title, description, instruction_steps, tips_for_success } = req.body
+  const result = await recipeInstruction.create({
+        title: title,
+        description: description,
+        instruction_steps: instruction_steps,
+        tips_for_success: tips_for_success
+  })
+  // next()
+  res.send(result)
+})
+
+// // updating a recipe
+router.put('/:id', async function (req, res, next) {
+  const id = req.params.id
+  const { title, description, instruction_steps, tips_for_success } = req.body
+  const result = await recipeInstruction.update(
+    {
+    title: title,
+    description: description,
+    instruction_steps: instruction_steps,
+    tips_for_success: tips_for_success
+  }, 
+  {where: { id: id }}
+  )
+  // res.send(result)
+  if (result[0] === 1) {
+    res.send('Instruction has been updated successfully')
+  }
+  else {
+    res.send('instruction does not exist')
+  }
+
+})
+
+// // //deleting a recipe
+// router.delete('/:id', async function (req, res, next) {
+//   const id = req.params.id
+//   const result = await Ingredient.destroy(
+//     { where: { id: id } }
+//   )
+//   // res.status(204).send({result: result})
+//   if (result === 0) {
+//     res.send('Ingredient does not exist ')
+//   }
+//   else {
+//     res.send('Ingredient has been deleted successfully')
+//   }
+// })
+
+// // // Get all recipes
+// // router.get('/', async function (req, res, next) {
+// //  const {status, title} = req.query
+// //  const whereClause = {}
+// //  if (status) {
+// //   whereClause.status = status
+// //  }
+// //  if (title) {
+// //   whereClause.title = title
+// //  }  
+// //  console.log(whereClause)
+// //   const recipes = await Recipe.findAll({where: whereClause})
+// //   res.send(recipes)
+// // })
+
+// // //Get recipe by id
+// // router.get('/:id', async function (req, res, next) {
+// //   const id = req.params.id
+// //   const recipe = await Recipe.findByPk (id)
+// //   console.log(recipe)
+// //   if (recipe) {
+// //     res.send(recipe)
+// //   } else {
+// //     res.send('recipe does not exist')
+// //   } 
+// // })
+
+// // //get recipe by title
+// // router.get('/title/:title', async function (req, res, next) {
+// //   const title = req.params.title
+// //   const recipe = await Recipe.findOne({where: {title: title}})
+// //   if (recipe) {
+// //     res.send(recipe)
+// //   } else {
+// //     res.send('recipe does not exist')
+// //   } 
+// // })
+
+module.exports = router

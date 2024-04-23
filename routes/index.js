@@ -1,13 +1,17 @@
-var express = require('express');
-var router = express.Router();
+var express = require('express')
+const userRouter = require('./users')
+const recipeRouter = require('./recipe')
+const recipeInstructionRouter = require('./instructions')
+const ingredientRouter = require('./ingredients')
+
+var router = express.Router()
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  const users = [
-    { name: 'john', age: 30 },
-    { name: 'jane', age: 25 },
-    { name: 'jack', age: 32 }
-  ]
-  res.send(users);
-});
-module.exports = router;
+router.use('/users', userRouter)
+router.use('/recipes', recipeRouter)
+router.use('/ingredients', ingredientRouter)
+router.use('/instructions', recipeInstructionRouter)
+
+
+
+module.exports = router

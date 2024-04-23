@@ -1,5 +1,4 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const { UPDATE } = require('sequelize/lib/query-types');
+const { Sequelize, DataTypes } = require('sequelize')
 const sequelize = new Sequelize('newRecipeApp', 'postgres', 'password!', {
     host: 'localhost',
     dialect: 'postgres',
@@ -22,10 +21,10 @@ const User = sequelize.define(
         email: { type: DataTypes.STRING, allowNull: false, unique: true },
         username: { type: DataTypes.STRING, allowNull: false, unique: true },
         password: { type: DataTypes.STRING, allowNull: false },
-        apassword_hint: { type: DataTypes.STRING, allowNull: false },
+        password_hint: { type: DataTypes.STRING, allowNull: false },
         phone: { type: DataTypes.STRING, allowNull: false },
     },
-    { paranoid: true }
+    { paranoid: false}
     )
 
 const Recipe = sequelize.define(
@@ -36,34 +35,56 @@ const Recipe = sequelize.define(
         prep_time: { type: DataTypes.DECIMAL, allowNull: false, defaultValue: 15 },
         cook_time: { type: DataTypes.DECIMAL, allowNull: false, defaultValue: 30 },
         yield: { type: DataTypes.INTEGER, allowNull: false },
+        status: { type: DataTypes.ENUM ('unpublished', 'published', 'deleted'), allowNull: false, defaultValue: 'unpublished' },
     },
     { paranoid: true }
     )
-User.hasMany(Recipe, { foreignKey: 'authorId' })
+
+const Ingredient = sequelize.define(
+    'Ingredient',
+    {   name: { type: DataTypes.STRING, allowNull: false },
+        unit: { type: DataTypes.STRING},
+        quantity: { type: DataTypes.DECIMAL },
+    }
+)
+
+const recipeInstruction = sequelize.define(
+    'recipeInstruction',
+    {   title: { type: DataTypes.STRING, allowNull: false },
+        description: { type: DataTypes.TEXT, allowNull: false },
+        instruction_steps : { type: DataTypes.TEXT, allowNull: false },
+        tips_for_success: { type: DataTypes.TEXT }, //Success  
+    }
+)
+User.hasMany(Recipe, { foreignKey: 'authorId' })  
 Recipe.belongsTo(User, { foreignKey: 'authorId' })
+Recipe.hasMany(Ingredient, { foreignKey: 'recipeId' })  
+Ingredient.belongsTo(Recipe, { foreignKey: 'recipeId' })
+Recipe.hasMany(recipeInstruction, { foreignKey: 'recipeId' })
+recipeInstruction.belongsTo(Recipe, { foreignKey: 'recipeId' })
+
 sequelize.sync( { alter: true } )
 
 //Creating an instance
-const create_user = async () =>{
+const create_user = async (req, res, next) =>{
     const user = await User.create({
-        firstName: 'Tolu',
-        lastName: 'Oloyede',
-        email: 'oloyede@example2.com',
-        username: 'Tolu    ',
+        firstName: 'Wale',
+        lastName: 'Ade',
+        email: 'waleAde@example2.com',
+        username: 'Whale    ',
         password: 'password',
-        apassword_hint: 'secret',
+        password_hint: 'secret',
         phone: '535-555-5908'
       })
-      console.log(user)
-}
-
+      next()
+    }
 //Updating an instance
 const update_user = async (id) =>{
-    const user = await User.update(
-        { firstName: 'Babajide', user: 'Tolu' },
-        { where: {id: id} }
-      )
-      console.log(user)
+  const user = await User.update(
+      { firstName: 'Babajide', user: 'Tolu' },
+      { where: {id: id} }
+    )
+    console.log(user)
 }
 
 //Deleting an instance
@@ -78,7 +99,9 @@ const get_all_users = async () =>{
     const user = await User.findAll()
     console.log(user.map(user => user.toJSON()))
 }
-//create_user()
+// create_user()
 //update_user (13)
 //delete_user(1)
-get_all_users()
+// get_all_users()
+
+module.exports = { User, Recipe, create_user,Ingredient, recipeInstruction }
